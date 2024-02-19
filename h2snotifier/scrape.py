@@ -1,11 +1,9 @@
 import logging
 
 import requests
-import json
 
 
-# Define the GraphQL query payload
-def scrape(cities=[], page_size=30):
+def generate_payload(cities, page_size):
     payload = {
         "operationName": "GetCategories",
         "variables": {
@@ -39,7 +37,7 @@ def scrape(cities=[], page_size=30):
                 __typename
               }
             }
-    
+
             fragment CategoryFragment on CategoryTree {
               uid
               meta_title
@@ -47,7 +45,7 @@ def scrape(cities=[], page_size=30):
               meta_description
               __typename
             }
-    
+
             fragment ProductsFragment on Products {
               items {
                 name
@@ -153,6 +151,106 @@ def scrape(cities=[], page_size=30):
             }
         """,
     }
+    return payload
+
+
+CITY_IDS = {
+    "24": "Amsterdam",
+    "320": "Arnhem",
+    "619": "Capelle aan den IJssel",
+    "26": "Delft",
+    "28": "Den Bosch",
+    "90": "Den Haag",
+    "110": "Diemen",
+    "620": "Dordrecht",
+    "29": "Eindhoven",
+    "545": "Groningen",
+    "616": "Haarlem",
+    "6099": "Helmond",
+    "6209": "Maarssen",
+    "6090": "Maastricht",
+    "6051": "Nieuwegein",
+    "6217": "Nijmegen",
+    "25": "Rotterdam",
+    "6224": "Rijswijk",
+    "6211": "Sittard",
+    "6093": "Tilburg",
+    "27": "Utrecht",
+    "6145": "Zeist",
+    "6088": "Zoetermeer",
+}
+
+CONTRACT_TYPES = {
+    "21": "Indefinite",
+    "6125": "2 years",
+    "20": "1 year max",
+    "318": "6 months max",
+    "606": "4 months max",
+}
+
+ROOM_TYPES = {
+    "104": "Studio",
+    "6137": "Loft (open bedroom area)",
+    "105": "1",
+    "106": "2",
+    "108": "3",
+    "382": "4",
+}
+
+MAX_REGISTER_TYPES = {
+    "22": "One",
+    "23": "Two (only couples)",
+    "500": "Two",
+    "380": "Family (parents with children)",
+    "501": "Three",
+    "502": "Four",
+}
+
+
+def city_id_to_city(city_id):
+    # Use CITY_IDS dictionary for city lookup
+    return CITY_IDS.get(city_id)
+
+
+def contract_type_id_to_str(contract_type_id):
+    # Use CONTRACT_TYPES dictionary for contract type lookup
+    return CONTRACT_TYPES.get(contract_type_id, "Unknown")
+
+
+def room_id_to_room(room_id):
+    # Use ROOM_TYPES dictionary for room type lookup
+    return ROOM_TYPES.get(room_id, "Unknown")
+
+
+def max_register_id_to_str(maxregister_id):
+    # Use MAX_REGISTER_TYPES dictionary for max occupancy lookup
+    return MAX_REGISTER_TYPES.get(maxregister_id, "Unknown")
+
+
+def url_key_to_link(url_key):
+    return f"https://holland2stay.com/residences/{url_key}.html"
+
+
+def house_to_msg(house):
+    return f"""
+New house in {house['city']}!
+{url_key_to_link(house['url_key'])}
+
+Area: {house['area']}m²
+Price: {int(house['price_inc']):,}€ (excl. {int(house['price_exc']):,}€ basic rent)
+
+Available from: {house['available_from']}
+Bedrooms: {house['rooms']}
+Max occupancy: {house['max_register']}
+Contract type: {house['contract_type']}
+
+# See details and apply on Holland2Stay website.
+# """
+
+
+# Define the GraphQL query payload
+def scrape(cities=[], page_size=30):
+    payload = generate_payload(cities, page_size)
     # Send POST request to the GraphQL endpoint
     response = requests.post("https://api.holland2stay.com/graphql/", json=payload)
     data = response.json()["data"]
@@ -185,87 +283,3 @@ def scrape(cities=[], page_size=30):
             logging.error("Error in parsing house")
             logging.error(house)
     return cities_dict
-
-
-def city_id_to_city(city_id):
-    return {
-        "24": "Amsterdam",
-        "320": "Arnhem",
-        "619": "Capelle aan den IJssel",
-        "26": "Delft",
-        "28": "Den Bosch",
-        "90": "Den Haag",
-        "110": "Diemen",
-        "620": "Dordrecht",
-        "29": "Eindhoven",
-        "545": "Groningen",
-        "616": "Haarlem",
-        "6099": "Helmond",
-        "6209": "Maarssen",
-        "6090": "Maastricht",
-        "6051": "Nieuwegein",
-        "6217": "Nijmegen",
-        "25": "Rotterdam",
-        "6224": "Rijswijk",
-        "6211": "Sittard",
-        "6093": "Tilburg",
-        "27": "Utrecht",
-        "6145": "Zeist",
-        "6088": "Zoetermeer",
-    }.get(city_id)
-
-
-def contract_type_id_to_str(contract_type_id):
-    mapping = {
-        "21": "Indefinite",
-        "6125": "2 years",
-        "20": "1 year max",
-        "318": "6 months max",
-        "606": "4 months max",
-    }
-    return mapping.get(contract_type_id, "Unknown")
-
-
-def room_id_to_room(room_id):
-    mapping = {
-        "104": "Studio",
-        "6137": "Loft (open bedroom area)",
-        "105": "1",
-        "106": "2",
-        "108": "3",
-        "382": "4",
-    }
-    return mapping.get(room_id, "Unknown")
-
-
-def max_register_id_to_str(maxregister_id):
-    mapping = {
-        "22": "One",
-        "23": "Two (only couples)",
-        "500": "Two",
-        "380": "Family (parents with children)",
-        "501": "Three",
-        "502": "Four",
-    }
-    return mapping.get(maxregister_id, "Unknown")
-
-
-def url_key_to_link(url_key):
-    return f"https://holland2stay.com/residences/{url_key}.html"
-
-
-def house_to_msg(house):
-    return f"""
-New house in #{city_id_to_city(house['city'])}!
-{url_key_to_link(house['url_key'])}
-Area: {house['area']}m2
-Final price: {int(house['price_inc']):,}💶 (Basic rent: {int(house['price_exc']):,}💶)
-
-Available from: {house['available_from']}
-Bedrooms: {house['rooms']}
-Max occupancy: {house['max_register']}
-Contract type: {house['contract_type']}
-
-
-Make sure to check everything before apply on Holland2Stay website before apply!
-    """.strip()
