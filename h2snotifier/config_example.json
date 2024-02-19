@@ -1,0 +1,12 @@
+{
+  "telegram": {
+    "groups": [
+      {
+        "name": "Debugging group",
+        "join_link": "https://t.me/h2sdebugging",
+        "cities": ["90", "6088", "24","25", "619"],
+        "chat_id": -1001918590031
+      }
+    ]
+  }
+}
