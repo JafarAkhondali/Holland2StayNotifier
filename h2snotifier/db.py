@@ -80,7 +80,7 @@ def sync_houses(city_id, houses):
     new_houses = []
     try:
         # Get the existing houses in the database for the given city_id
-        c.execute("""SELECT url_key FROM houses WHERE city = ?""", (city_id,))
+        c.execute("""SELECT url_key FROM houses WHERE city = ? and occupied_at is null """, (city_id,))
         existing_houses = set(row[0] for row in c.fetchall())
 
         # Extract the url_keys from the new houses
@@ -89,7 +89,7 @@ def sync_houses(city_id, houses):
         # Houses to be updated (those in the database but not in the new houses)
         to_be_updated = existing_houses - new_houses_url_keys
         if to_be_updated:
-            update_query = f"""UPDATE houses SET occupied_at = ? WHERE url_key IN ({','.join(['?'] * len(to_be_updated))})"""
+            update_query = f"""UPDATE houses SET occupied_at = ? WHERE occupied_at is null and url_key IN ({','.join(['?'] * len(to_be_updated))})"""
             c.execute(
                 update_query, (datetime.now().isoformat(),) + tuple(to_be_updated)
             )
@@ -101,14 +101,16 @@ def sync_houses(city_id, houses):
             if house["url_key"] not in existing_houses
         ]
 
+        new_houses = []
+        for house in houses:
+            if house["url_key"] not in existing_houses:
+                new_houses.append(house)
         if to_be_inserted:
             # print(list(to_be_inserted[0]))
             insert_query = f"""INSERT INTO houses ({','.join(house_columns)}) VALUES ({','.join(['?'] * len(house_columns))})"""
             c.executemany(insert_query, to_be_inserted)
             conn.commit()
 
-            # Fetch newly created houses
-            new_houses = houses
             logging.info(f"{len(new_houses)} new houses inserted into the database")
 
     except sqlite3.Error as e:
