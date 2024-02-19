@@ -244,8 +244,7 @@ Bedrooms: {house['rooms']}
 Max occupancy: {house['max_register']}
 Contract type: {house['contract_type']}
 
-# See details and apply on Holland2Stay website.
-# """
+# See details and apply on Holland2Stay website."""
 
 
 # Define the GraphQL query payload

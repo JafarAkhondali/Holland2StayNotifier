@@ -8,20 +8,21 @@ from telegram import TelegramBot
 import json
 
 env = dotenv_values(".env")
-TELEGRAM_API_KEY = env.get('TELEGRAM_API_KEY')
+TELEGRAM_API_KEY = env.get("TELEGRAM_API_KEY")
+TELEGRAM_API_KEY = env.get("TELEGRAM_API_KEY")
 
 
-def read_config(config_path='config.json'):
+def read_config(config_path="config.json"):
     with open(config_path) as f:
         return json.load(f)
 
 
 def main():
     create_table()
-    config = read_config('config.json')
-    for gp in config['telegram']['groups']:
-        cities = gp['cities']
-        chat_id = gp['chat_id']
+    config = read_config("config.json")
+    for gp in config["telegram"]["groups"]:
+        cities = gp["cities"]
+        chat_id = gp["chat_id"]
         telegram = TelegramBot(apikey=TELEGRAM_API_KEY, chat_id=chat_id)
         houses_in_cities = scrape(cities=cities)
         for city_id, houses in houses_in_cities.items():
