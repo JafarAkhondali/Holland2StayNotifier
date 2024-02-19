@@ -14,10 +14,10 @@ def scrape(cities=[], page_size=30):
             "filters": {
                 "available_to_book": {"in": ["179", "336"]},
                 "city": {"in": cities},
-                "category_uid": {"eq": "Nw=="}
+                "category_uid": {"eq": "Nw=="},
             },
             "pageSize": page_size,
-            "sort": {"available_startdate": "ASC"}
+            "sort": {"available_startdate": "ASC"},
         },
         "query": """
             query GetCategories($id: String!, $pageSize: Int!, $currentPage: Int!, $filters: ProductAttributeFilterInput!, $sort: ProductAttributeSortInput) {
@@ -151,29 +151,36 @@ def scrape(cities=[], page_size=30):
               total_count
               __typename
             }
-        """
+        """,
     }
     # Send POST request to the GraphQL endpoint
-    response = requests.post('https://api.holland2stay.com/graphql/', json=payload)
-    data = response.json()['data']
+    response = requests.post("https://api.holland2stay.com/graphql/", json=payload)
+    data = response.json()["data"]
     cities_dict = {}
     for c in cities:
         cities_dict[c] = []
-    for house in data['products']['items']:
-        city_id = str(house['city'])
+    for house in data["products"]["items"]:
+        city_id = str(house["city"])
         try:
-            cities_dict[city_id].append({
-                'url_key': house['url_key'],
-                'city': str(house['city']),
-                'area': str(house['living_area']),
-                'price_exc': str(house['basic_rent']),
-                'price_inc': str(house['price_range']['maximum_price']['final_price']['value']),
-                'available_from': house['available_startdate'],
-                'max_register': str(house['maximum_number_of_persons']),  # TODO: mapping
-                'contract_type': str(house['type_of_contract']),  # TODO: needs mapping
-                'min_stay': str(house['type_of_contract']),  # TODO: needs key update and mapping
-                'rooms': str(house['no_of_rooms']),  # TODO: needs reformat
-            })
+            cities_dict[city_id].append(
+                {
+                    "url_key": house["url_key"],
+                    "city": str(house["city"]),
+                    "area": str(house["living_area"]),
+                    "price_exc": str(house["basic_rent"]),
+                    "price_inc": str(
+                        house["price_range"]["maximum_price"]["final_price"]["value"]
+                    ),
+                    "available_from": house["available_startdate"],
+                    "max_register": str(
+                        max_register_id_to_str(str(house["maximum_number_of_persons"])),
+                    ),
+                    "contract_type": contract_type_id_to_str(
+                        str(house["type_of_contract"])
+                    ),
+                    "rooms": room_id_to_room(str(house["no_of_rooms"])),
+                }
+            )
         except Exception as err:
             logging.error("Error in parsing house")
             logging.error(house)
@@ -182,145 +189,83 @@ def scrape(cities=[], page_size=30):
 
 def city_id_to_city(city_id):
     return {
-        '24': 'Amsterdam',
-        '320': 'Arnhem',
-        '619': 'Capelle aan den IJssel',
-        '26': 'Delft',
-        '28': 'Den Bosch',
-        '90': 'Den Haag',
-        '110': 'Diemen',
-        '620': 'Dordrecht',
-        '29': 'Eindhoven',
-        '545': 'Groningen',
-        '616': 'Haarlem',
-        '6099': 'Helmond',
-        '6209': 'Maarssen',
-        '6090': 'Maastricht',
-        '6051': 'Nieuwegein',
-        '6217': 'Nijmegen',
-        '25': 'Rotterdam',
-        '6224': 'Rijswijk',
-        '6211': 'Sittard',
-        '6093': 'Tilburg',
-        '27': 'Utrecht',
-        '6145': 'Zeist',
-        '6088': 'Zoetermeer'
+        "24": "Amsterdam",
+        "320": "Arnhem",
+        "619": "Capelle aan den IJssel",
+        "26": "Delft",
+        "28": "Den Bosch",
+        "90": "Den Haag",
+        "110": "Diemen",
+        "620": "Dordrecht",
+        "29": "Eindhoven",
+        "545": "Groningen",
+        "616": "Haarlem",
+        "6099": "Helmond",
+        "6209": "Maarssen",
+        "6090": "Maastricht",
+        "6051": "Nieuwegein",
+        "6217": "Nijmegen",
+        "25": "Rotterdam",
+        "6224": "Rijswijk",
+        "6211": "Sittard",
+        "6093": "Tilburg",
+        "27": "Utrecht",
+        "6145": "Zeist",
+        "6088": "Zoetermeer",
     }.get(city_id)
 
 
-def room_id_to_room(room_id):
-    # TODO:
-    '''
-    {
-	"10": {
-		"label": "Bedrooms",
-				"attribute_code": "no_of_rooms",
-		"options": [
-			{
-				"label": "Studio",
-								"value": "104",
-				
-			},
-			{
-				"label": "Loft (open bedroom area)",
-								"value": "6137",
-				
-			},
-			{
-				"label": "1",
-								"value": "105",
-				
-			},
-			{
-				"label": "2",
-								"value": "106",
-				
-			},
-			{
-				"label": "3",
-								"value": "108",
-				
-			},
-			{
-				"label": "4",
-								"value": "382",
-				
-			}
-		],
-		"position": 50,
-		
-	}
-}
+def contract_type_id_to_str(contract_type_id):
+    mapping = {
+        "21": "Indefinite",
+        "6125": "2 years",
+        "20": "1 year max",
+        "318": "6 months max",
+        "606": "4 months max",
+    }
+    return mapping.get(contract_type_id, "Unknown")
 
-    '''
-    return room_id
+
+def room_id_to_room(room_id):
+    mapping = {
+        "104": "Studio",
+        "6137": "Loft (open bedroom area)",
+        "105": "1",
+        "106": "2",
+        "108": "3",
+        "382": "4",
+    }
+    return mapping.get(room_id, "Unknown")
 
 
 def max_register_id_to_str(maxregister_id):
-    # TODO
-    '''
-    {
-	"11": {
-		"label": "Max. occupants",
-				"attribute_code": "maximum_number_of_persons",
-		"options": [
-			{
-				"label": "One",
-								"value": "22",
-				
-			},
-			{
-				"label": "Two (only couples)",
-								"value": "23",
-				
-			},
-			{
-				"label": "Two",
-								"value": "500",
-				
-			},
-			{
-				"label": "Family (parents with children)",
-								"value": "380",
-				
-			},
-			{
-				"label": "Three",
-								"value": "501",
-				
-			},
-			{
-				"label": "Four",
-								"value": "502",
-				
-			}
-		],
-		"position": 50,
-		
-	}
-}
-    '''
-    return maxregister_id
+    mapping = {
+        "22": "One",
+        "23": "Two (only couples)",
+        "500": "Two",
+        "380": "Family (parents with children)",
+        "501": "Three",
+        "502": "Four",
+    }
+    return mapping.get(maxregister_id, "Unknown")
 
 
 def url_key_to_link(url_key):
-    return f'https://holland2stay.com/residences/{url_key}.html'
+    return f"https://holland2stay.com/residences/{url_key}.html"
 
 
 def house_to_msg(house):
-    return f'''
+    return f"""
 New house in #{city_id_to_city(house['city'])}!
 {url_key_to_link(house['url_key'])}
 Area: {house['area']}m2
 Final price: {house['price_inc']:3,}💶 (Basic rent: {house['price_exc']:3,}💶)
 
 Available from: {house['available_from']}
-Bedrooms: TBD
-Max occupancy: TBD
-Contract type: TBD
-Minimum stay: TBD
-
+Bedrooms: {house['rooms']}
+Max occupancy: {house['max_register']}
+Contract type: {house['contract_type']}
 
 
 Make sure to check everything before apply on Holland2Stay website before apply!
-    '''.strip()
+    """.strip()
