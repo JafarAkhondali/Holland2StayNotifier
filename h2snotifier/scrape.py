@@ -259,7 +259,7 @@ def house_to_msg(house):
 New house in #{city_id_to_city(house['city'])}!
 {url_key_to_link(house['url_key'])}
 Area: {house['area']}m2
-Final price: {house['price_inc']:3,}💶 (Basic rent: {house['price_exc']:3,}💶)
+Final price: {int(house['price_inc']):,}💶 (Basic rent: {int(house['price_exc']):,}💶)
 
 Available from: {house['available_from']}
 Bedrooms: {house['rooms']}
