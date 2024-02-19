@@ -231,12 +231,18 @@ def url_key_to_link(url_key):
     return f"https://holland2stay.com/residences/{url_key}.html"
 
 
+def clean_img(url):
+    parts = url.split('/')
+    ci = parts.index('cache')
+    return '/'.join(parts[:ci] + parts[ci + 2:])
+
+
 def house_to_msg(house):
     return f"""
-New house in {house['city']}!
+New house in #{city_id_to_city(house['city'])}!
 {url_key_to_link(house['url_key'])}
 
-Area: {house['area']}m²
+Living area: {house['area']}m²
 Price: {int(house['price_inc']):,}€ (excl. {int(house['price_exc']):,}€ basic rent)
 Price per meter: {float(float(house['price_inc']) / float(house['area'])):.2f} €\\m²
 
@@ -277,7 +283,9 @@ def scrape(cities=[], page_size=30):
                         str(house["type_of_contract"])
                     ),
                     "rooms": room_id_to_room(str(house["no_of_rooms"])),
+                    "images": [clean_img(img['url']) for img in house['media_gallery']]
                 }
+
             )
         except Exception as err:
             logging.error("Error in parsing house")

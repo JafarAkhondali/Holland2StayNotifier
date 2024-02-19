@@ -29,7 +29,11 @@ def main():
             new_houses = sync_houses(city_id=city_id, houses=houses)
 
             for h in new_houses:
-                telegram.send_simple_msg(house_to_msg(h))
+                if len(h['images']) > 0:
+                    telegram.send_media_group(h['images'][:4], house_to_msg(h))
+                else:
+                    telegram.send_simple_msg(house_to_msg(h))
+
                 logging.info(f"Sent telegram Notif for {h['url_key']}")
 
 
