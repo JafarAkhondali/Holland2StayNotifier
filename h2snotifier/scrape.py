@@ -238,6 +238,7 @@ New house in {house['city']}!
 
 Area: {house['area']}m²
 Price: {int(house['price_inc']):,}€ (excl. {int(house['price_exc']):,}€ basic rent)
+Price per meter: {float(float(house['price_inc']) / float(house['area'])):.2f} €\\m²
 
 Available from: {house['available_from']}
 Bedrooms: {house['rooms']}
