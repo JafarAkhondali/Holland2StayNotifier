@@ -243,6 +243,8 @@ def url_key_to_link(url_key):
 
 def clean_img(url):
     try:
+        if 'cache' not in url:
+            return url
         parts = url.split('/')
         ci = parts.index('cache')
         return '/'.join(parts[:ci] + parts[ci + 2:])
