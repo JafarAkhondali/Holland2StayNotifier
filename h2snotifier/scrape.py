@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from h2snotifier.main import debug_telegram
+from main import debug_telegram
 
 
 def generate_payload(cities, page_size):
