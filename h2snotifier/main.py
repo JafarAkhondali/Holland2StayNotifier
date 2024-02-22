@@ -11,6 +11,8 @@ env = dotenv_values(".env")
 TELEGRAM_API_KEY = env.get("TELEGRAM_API_KEY")
 DEBUGGING_CHAT_ID = env.get("DEBUGGING_CHAT_ID")
 
+debug_telegram = TelegramBot(apikey=TELEGRAM_API_KEY, chat_id=DEBUGGING_CHAT_ID)
+
 
 def read_config(config_path="config.json"):
     with open(config_path) as f:
@@ -36,7 +38,6 @@ def main():
                         telegram.send_simple_msg(house_to_msg(h))
                     logging.info(f"Sent telegram Notif for {h['url_key']}")
                 except Exception as error:
-                    debug_telegram = TelegramBot(apikey=TELEGRAM_API_KEY, chat_id=DEBUGGING_CHAT_ID)
                     debug_telegram.send_simple_msg(f"Sending notification failed! {h}")
                     debug_telegram.send_simple_msg(str(error))
                     logging.info(f"Sending notification failed! {h}")

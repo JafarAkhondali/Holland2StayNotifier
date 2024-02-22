@@ -2,6 +2,8 @@ import logging
 
 import requests
 
+from h2snotifier.main import debug_telegram
+
 
 def generate_payload(cities, page_size):
     payload = {
@@ -288,6 +290,8 @@ def scrape(cities=[], page_size=30):
 
             )
         except Exception as err:
+            debug_telegram.send_simple_msg(f"Error in parsing house!")
+            debug_telegram.send_simple_msg(str(err))
             logging.error("Error in parsing house")
-            logging.error(house)
+            logging.error(str(err))
     return cities_dict
