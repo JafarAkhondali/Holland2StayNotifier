@@ -1,1 +1,2 @@
 TELEGRAM_API_KEY=enter_your_telegram_token_here
+DEBUGGING_CHAT_ID=your_telegram_group_for_debugging
