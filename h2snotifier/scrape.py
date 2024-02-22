@@ -2,7 +2,15 @@ import logging
 
 import requests
 
-from main import debug_telegram
+from dotenv import dotenv_values
+from telegram import TelegramBot
+
+
+env = dotenv_values(".env")
+TELEGRAM_API_KEY = env.get("TELEGRAM_API_KEY")
+DEBUGGING_CHAT_ID = env.get("DEBUGGING_CHAT_ID")
+
+debug_telegram = TelegramBot(apikey=TELEGRAM_API_KEY, chat_id=DEBUGGING_CHAT_ID)
 
 
 def generate_payload(cities, page_size):
