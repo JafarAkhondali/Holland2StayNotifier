@@ -242,9 +242,13 @@ def url_key_to_link(url_key):
 
 
 def clean_img(url):
-    parts = url.split('/')
-    ci = parts.index('cache')
-    return '/'.join(parts[:ci] + parts[ci + 2:])
+    try:
+        parts = url.split('/')
+        ci = parts.index('cache')
+        return '/'.join(parts[:ci] + parts[ci + 2:])
+    except Exception as error:
+        debug_telegram.send_simple_msg(url)
+        debug_telegram.send_simple_msg(str(error))
 
 
 def house_to_msg(house):
