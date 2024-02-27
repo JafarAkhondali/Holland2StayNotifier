@@ -286,7 +286,7 @@ def scrape(cities=[], page_size=30):
                 {
                     "url_key": house["url_key"],
                     "city": str(house["city"]),
-                    "area": str(house["living_area"]),
+                    "area": str(house["living_area"]).replace(",","."),
                     "price_exc": str(house["basic_rent"]),
                     "price_inc": str(
                         house["price_range"]["maximum_price"]["final_price"]["value"]
