@@ -43,8 +43,11 @@ def main():
 
                 # Back-off strategy for when sending with media failed, or house doesn't have any image
                 try:
-                    telegram.send_simple_msg(house_to_msg(h))
+                    res = telegram.send_simple_msg(house_to_msg(h))
                     logging.info(f"Sent telegram Notif for {h['url_key']}")
+                    if res.status_code != 200:
+                        debug_telegram.send_simple_msg("Sending telegram notif failed !!")
+                        debug_telegram.send_simple_msg(res.text)
                 except Exception as error:
                     debug_telegram.send_simple_msg(f"Sending notification failed as simple message! {h}")
                     debug_telegram.send_simple_msg(str(error))

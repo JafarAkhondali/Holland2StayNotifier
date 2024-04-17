@@ -48,7 +48,7 @@ class TelegramBot:
     def send_simple_msg(self, msg):
         room_desc_encoded = quote(msg.encode("utf8"))
         url = f"https://api.telegram.org/bot{self.apikey}/sendMessage?chat_id={self.chat_id}&text={room_desc_encoded}"
-        res = requests.get(url).json()
+        return requests.get(url).json()
 
     def send_notification(self, data):
         message = {data.get("message")}
