@@ -47,7 +47,7 @@ def main():
                     logging.info(f"Sent telegram Notif for {h['url_key']}")
                     if res.status_code != 200:
                         debug_telegram.send_simple_msg("Sending telegram notif failed !!")
-                        debug_telegram.send_simple_msg(res.text)
+                        debug_telegram.send_simple_msg(res.json())
                 except Exception as error:
                     debug_telegram.send_simple_msg(f"Sending notification failed as simple message! {h}")
                     debug_telegram.send_simple_msg(str(error))
