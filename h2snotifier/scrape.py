@@ -5,7 +5,6 @@ import requests
 from dotenv import dotenv_values
 from telegram import TelegramBot
 
-
 env = dotenv_values(".env")
 TELEGRAM_API_KEY = env.get("TELEGRAM_API_KEY")
 DEBUGGING_CHAT_ID = env.get("DEBUGGING_CHAT_ID")
@@ -282,11 +281,17 @@ def scrape(cities=[], page_size=30):
     for house in data["products"]["items"]:
         city_id = str(house["city"])
         try:
+
+            cleaned_images = [clean_img(img['url']) for img in house['media_gallery']]
+
+            # For now, this image is making an issue. Maybe we need to add similar images later
+            cleaned_images = list(filter(lambda x: "logo-blue-1.jpg" not in x, cleaned_images))
+
             cities_dict[city_id].append(
                 {
                     "url_key": house["url_key"],
                     "city": str(house["city"]),
-                    "area": str(house["living_area"]).replace(",","."),
+                    "area": str(house["living_area"]).replace(",", "."),
                     "price_exc": str(house["basic_rent"]),
                     "price_inc": str(
                         house["price_range"]["maximum_price"]["final_price"]["value"]
@@ -299,7 +304,7 @@ def scrape(cities=[], page_size=30):
                         str(house["type_of_contract"])
                     ),
                     "rooms": room_id_to_room(str(house["no_of_rooms"])),
-                    "images": [clean_img(img['url']) for img in house['media_gallery']]
+                    "images": cleaned_images
                 }
 
             )
