@@ -34,11 +34,19 @@ def main():
                 try:
                     if len(h['images']) > 0:
                         telegram.send_media_group(h['images'][:4], house_to_msg(h))
-                    else:
-                        telegram.send_simple_msg(house_to_msg(h))
+                        continue
+                except Exception as error:
+                    debug_telegram.send_simple_msg(f"Sending notification failed as multi image! {h}")
+                    debug_telegram.send_simple_msg(str(error))
+                    logging.info(f"Sending notification failed! {h}")
+                    logging.info(str(error))
+
+                # Back-off strategy for when sending with media failed, or house doesn't have any image
+                try:
+                    telegram.send_simple_msg(house_to_msg(h))
                     logging.info(f"Sent telegram Notif for {h['url_key']}")
                 except Exception as error:
-                    debug_telegram.send_simple_msg(f"Sending notification failed! {h}")
+                    debug_telegram.send_simple_msg(f"Sending notification failed as simple message! {h}")
                     debug_telegram.send_simple_msg(str(error))
                     logging.info(f"Sending notification failed! {h}")
                     logging.info(str(error))

@@ -20,14 +20,17 @@ class TelegramBot:
         media = []
         for i, img in enumerate(images):
             with BytesIO() as output:
-                img = Image.open(requests.get(img, stream=True).raw)
-                img.save(output, format="PNG")
-                output.seek(0)
-                name = f"photo-{random.random()}-{i}.png"
-                files[name] = output.read()
-                img.save(name)
-                # a list of InputMediaPhoto. attach refers to the name of the file in the files dict
-                media.append(dict(type="photo", media=f"attach://{name}"))
+                try:
+                    img = Image.open(requests.get(img, stream=True).raw)
+                    img.save(output, format="PNG")
+                    output.seek(0)
+                    name = f"photo-{random.random()}-{i}.png"
+                    files[name] = output.read()
+                    img.save(name)
+                    # a list of InputMediaPhoto. attach refers to the name of the file in the files dict
+                    media.append(dict(type="photo", media=f"attach://{name}"))
+                except Exception as e:
+                    pass
         media[0]["caption"] = caption
         resp = requests.post(
             send_media_group,
