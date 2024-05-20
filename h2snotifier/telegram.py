@@ -27,43 +27,30 @@ class TelegramBot:
                     name = f"photo-{random.random()}-{i}.png"
                     files[name] = output.read()
                     img.save(name)
-                    # a list of InputMediaPhoto. attach refers to the name of the file in the files dict
                     media.append(dict(type="photo", media=f"attach://{name}"))
                 except Exception as e:
-                    pass
-        media[0]["caption"] = caption
-        resp = requests.post(
-            send_media_group,
-            data={
-                "media": json.dumps(media),
-                "chat_id": self.chat_id,
-                "reply_to_message_id": reply_to_message_id,
-            },
-            files=files,
-        )
-        for img in files.keys():
-            os.remove(img)
-        return resp
+                    logging.error(f"Error processing image: {img}, Error: {e}")
+                    debug_telegram.send_simple_msg(f"Error processing image: {img}")
+                    debug_telegram.send_simple_msg(str(e))
+                    continue
+        if media:
+            media[0]["caption"] = caption
+            resp = requests.post(
+                send_media_group,
+                data={
+                    "media": json.dumps(media),
+                    "chat_id": self.chat_id,
+                    "reply_to_message_id": reply_to_message_id,
+                },
+                files=files,
+            )
+            for img in files.keys():
+                os.remove(img)
+            return resp
+        else:
+            return None
 
     def send_simple_msg(self, msg):
         room_desc_encoded = quote(msg.encode("utf8"))
         url = f"https://api.telegram.org/bot{self.apikey}/sendMessage?chat_id={self.chat_id}&text={room_desc_encoded}"
         return requests.get(url)
-
-    def send_notification(self, data):
-        message = {data.get("message")}
-
-        image_links = []
-        for pic in data["pictures"]:
-            image_links.append(pic["uri"])
-        self.send_media_group(image_links, message)
-        room_desc_encoded = quote(data["description"].encode("utf8"))
-        url = f"https://api.telegram.org/bot{self.apikey}/sendMessage?chat_id={self.chat_id}&text={room_desc_encoded}"
-        requests.get(url).json()
-
-        self.send_location(data["lat"], data["long"])
-
-    def send_location(self, latitude, longitude):
-        url = f"https://api.telegram.org/bot{self.apikey}/sendLocation"
-        data = {"chat_id": self.chat_id, "latitude": latitude, "longitude": longitude}
-        requests.post(url, data=data)

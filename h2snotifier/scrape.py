@@ -272,7 +272,6 @@ Contract type: {house['contract_type']}
 # Define the GraphQL query payload
 def scrape(cities=[], page_size=30):
     payload = generate_payload(cities, page_size)
-    # Send POST request to the GraphQL endpoint
     response = requests.post("https://api.holland2stay.com/graphql/", json=payload)
     data = response.json()["data"]
     cities_dict = {}
@@ -281,7 +280,6 @@ def scrape(cities=[], page_size=30):
     for house in data["products"]["items"]:
         city_id = str(house["city"])
         try:
-
             cleaned_images = [clean_img(img['url']) for img in house['media_gallery']]
 
             # For now, this image is making an issue. Maybe we need to add similar images later
@@ -306,7 +304,6 @@ def scrape(cities=[], page_size=30):
                     "rooms": room_id_to_room(str(house["no_of_rooms"])),
                     "images": cleaned_images
                 }
-
             )
         except Exception as err:
             debug_telegram.send_simple_msg(f"Error in parsing house!")
