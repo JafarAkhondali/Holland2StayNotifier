@@ -33,26 +33,34 @@ def main():
             for h in new_houses:
                 try:
                     if len(h['images']) > 0:
-                        telegram.send_media_group(h['images'][:4], house_to_msg(h))
-                        continue
-                except Exception as error:
-                    debug_telegram.send_simple_msg(f"Sending notification failed as multi image! {h}")
-                    debug_telegram.send_simple_msg(str(error))
-                    logging.info(f"Sending notification failed! {h}")
-                    logging.info(str(error))
+                        try:
+                            telegram.send_media_group(h['images'][:4], house_to_msg(h))
+                            continue
+                        except Exception as error:
+                            debug_telegram.send_simple_msg(f"Sending notification failed as multi image! {h}")
+                            debug_telegram.send_simple_msg(str(error))
+                            logging.info(f"Sending notification failed! {h}")
+                            logging.info(str(error))
 
-                # Back-off strategy for when sending with media failed, or house doesn't have any image
-                try:
-                    res = telegram.send_simple_msg(house_to_msg(h))
-                    logging.info(f"Sent telegram Notif for {h['url_key']}")
-                    if res.status_code != 200:
-                        debug_telegram.send_simple_msg("Sending telegram notif failed !!")
-                        debug_telegram.send_simple_msg(str(res.json()))
-                except Exception as error:
-                    debug_telegram.send_simple_msg(f"Sending notification failed as simple message! {h}")
-                    debug_telegram.send_simple_msg(str(error))
-                    logging.info(f"Sending notification failed! {h}")
-                    logging.info(str(error))
+                    # Back-off strategy for when sending with media failed, or house doesn't have any image
+                    try:
+                        res = telegram.send_simple_msg(house_to_msg(h))
+                        logging.info(f"Sent telegram Notif for {h['url_key']}")
+                        if res.status_code != 200:
+                            debug_telegram.send_simple_msg("Sending telegram notif failed !!")
+                            debug_telegram.send_simple_msg(str(res.json()))
+                    except Exception as error:
+                        debug_telegram.send_simple_msg(f"Sending notification failed as simple message! {h}")
+                        debug_telegram.send_simple_msg(str(error))
+                        logging.info(f"Sending notification failed! {h}")
+                        logging.info(str(error))
+
+                except Exception as outer_error:
+                    debug_telegram.send_simple_msg(f"An error occurred while processing house: {h}")
+                    debug_telegram.send_simple_msg(str(outer_error))
+                    logging.info(f"An error occurred while processing house: {h}")
+                    logging.info(str(outer_error))
+
 
 
 if __name__ == "__main__":
