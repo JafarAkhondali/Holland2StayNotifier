@@ -165,6 +165,7 @@ def generate_payload(cities, page_size):
 
 CITY_IDS = {
     "24": "Amsterdam",
+    "6249": "Amersfoort",
     "320": "Arnhem",
     "619": "Capelle aan den IJssel",
     "26": "Delft",
